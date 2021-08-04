@@ -19,9 +19,14 @@ func GetTageTotal(maps interface{}) (count int64) {
 	return
 }
 
-func ExistTagByName(name string) bool {
+func ExistTagByName(name string, id int) bool {
 	var tag Tag
-	db.Select("id").Where("name=?", name).First(&tag)
+	if id != 0 {
+		db.Select("id").Where("name=? and id <> ?", name, id).First(&tag)
+	} else {
+		db.Select("id").Where("name=?", name).First(&tag)
+	}
+
 	if tag.ID > 0 {
 		return true
 	}

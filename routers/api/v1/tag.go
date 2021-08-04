@@ -56,7 +56,7 @@ func AddTag(c *gin.Context) {
 
 	code := e.INVALID_PARAMS
 	if !valid.HasErrors() {
-		if !models.ExistTagByName(name) {
+		if !models.ExistTagByName(name, 0) {
 			code = e.SUCCESS
 			models.AddTag(name, state, createdBy)
 		} else {
@@ -81,15 +81,14 @@ func EditTag(c *gin.Context) {
 	id := com.StrTo(c.Param("id")).MustInt()
 	name := c.PostForm("name")
 	modifiedBy := c.PostForm("modified_by")
-	
+
 	valid := validation.Validation{}
-	var state := -1
-	if arg:=c.PostForm("state");arg != ""{
-		state = com.StrTo(c.PostForm("state", "0")).MustInt()
+	var state int = -1
+	if arg := c.PostForm("state"); arg != "" {
+		state = com.StrTo(c.DefaultPostForm("state", "0")).MustInt()
 		valid.Range(state, 0, 1, "state").Message("状态只允许0或1")
 	}
-	
-	valid.Required(name, "name").Message("名称不能为空")
+
 	valid.MaxSize(name, 100, "name").Message("名称最长为100个字符")
 	valid.Required(modifiedBy, "modified_by").Message("修改人不能为空")
 	valid.MaxSize(modifiedBy, 100, "modified_by").Message("修改人最长为100个字符")
@@ -97,8 +96,12 @@ func EditTag(c *gin.Context) {
 	code := e.INVALID_PARAMS
 	if !valid.HasErrors() {
 		code = e.SUCCESS
-		if models.ExistTagById(id) {
-			data := make(map[string]string)
+		if !models.ExistTagById(id) {
+			code = e.ERROR_NOT_EXIST_TAG
+		} else if models.ExistTagByName(name, id) {
+			code = e.ERROR_EXIST_TAG
+		} else {
+			data := make(map[string]interface{})
 			data["modified_by"] = modifiedBy
 			if name != "" {
 				data["name"] = name
@@ -107,9 +110,7 @@ func EditTag(c *gin.Context) {
 				data["state"] = state
 			}
 
-			models.EditTag(id)
-		} else {
-			code = e.ERROR_NOT_EXIST_TAG
+			models.EditTag(id, data)
 		}
 	} else {
 		for _, err := range valid.Errors {
