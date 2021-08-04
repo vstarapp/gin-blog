@@ -1,5 +1,11 @@
 package models
 
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
 type Tag struct {
 	Model
 	Name       string `json:"name"`
@@ -66,14 +72,15 @@ func EditTag(id int, data interface{}) bool {
 	return true
 }
 
-// func (tag *Tag) BeforeCreate(scope *gorm.Scope) error {
-// 	scope.SetColumn("CreateOn", time.Now().Unix())
+func (tag *Tag) BeforeCreate(tx *gorm.DB) (err error) {
+	tag.Model.CreatedOn = int(time.Now().Unix())
 
-// 	return nil
-// }
+	return nil
+}
 
-// func (tag *Tag) BeforeUpdate(scope *gorm.Scope) error {
-// 	scope.SetColumn("ModifiedOn", time.Now().Unix())
+func (tag *Tag) BeforeSave(tx *gorm.DB) error {
+	tag.Model.ModifiedOn = int(time.Now().Unix())
+	tag.Model.CreatedOn = 123
 
-// 	return nil
-// }
+	return nil
+}

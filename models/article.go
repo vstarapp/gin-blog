@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Article struct {
 	Model
@@ -51,7 +55,6 @@ func AddArticle(data map[string]interface{}) bool {
 		Content:   data["content"].(string),
 		CreatedBy: data["created_by"].(string),
 		State:     data["state"].(int),
-		CreatedOn: int(time.Now().Unix()),
 	})
 
 	return true
@@ -67,4 +70,15 @@ func DeleteArticle(id int) bool {
 	db.Where("id = ?", id).Delete(&Article{})
 
 	return true
+}
+
+func (article *Article) BeforeCreate(tx *gorm.DB) (err error) {
+	article.Model.CreatedOn = int(time.Now().Unix())
+
+	return nil
+}
+
+func (article *Article) BeforeSave(tx *gorm.DB) (err error) {
+	article.Model.ModifiedOn = int(time.Now().Unix())
+	return nil
 }
