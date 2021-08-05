@@ -82,3 +82,10 @@ func (article *Article) BeforeSave(tx *gorm.DB) (err error) {
 	article.Model.ModifiedOn = int(time.Now().Unix())
 	return nil
 }
+
+// 硬删除
+func CleanAllArticle() bool {
+	db.Unscoped().Where("deleted != ", 0).Delete(&Article{})
+
+	return true
+}

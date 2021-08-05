@@ -3,9 +3,9 @@ package v1
 import (
 	"gin-blog/models"
 	"gin-blog/pkg/e"
+	"gin-blog/pkg/logging"
 	"gin-blog/pkg/setting"
 	"gin-blog/pkg/util"
-	"log"
 	"net/http"
 
 	"github.com/astaxie/beego/validation"
@@ -64,7 +64,7 @@ func AddTag(c *gin.Context) {
 		}
 	} else {
 		for _, err := range valid.Errors {
-			log.Println(err.Key, err.Message)
+			logging.Info(err.Key, err.Message)
 		}
 	}
 
@@ -76,7 +76,11 @@ func AddTag(c *gin.Context) {
 
 }
 
-// 修改文章标签
+// @Summary 修改文章标签
+// @Produce json
+// @Param id param int true "ID"
+// @Param name post string true "ID"
+// @Param state post string false "State"
 func EditTag(c *gin.Context) {
 	id := com.StrTo(c.Param("id")).MustInt()
 	name := c.PostForm("name")
@@ -114,7 +118,7 @@ func EditTag(c *gin.Context) {
 		}
 	} else {
 		for _, err := range valid.Errors {
-			log.Println(err.Key, err.Message)
+			logging.Info(err.Key, err.Message)
 		}
 	}
 
@@ -142,7 +146,7 @@ func DeleteTag(c *gin.Context) {
 		}
 	} else {
 		for _, err := range valid.Errors {
-			log.Println(err.Key, err.Message)
+			logging.Info(err.Key, err.Message)
 		}
 	}
 

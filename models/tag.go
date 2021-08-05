@@ -1,6 +1,7 @@
 package models
 
 import (
+	"log"
 	"time"
 
 	"gorm.io/gorm"
@@ -67,9 +68,15 @@ func DeleteTag(id int) bool {
 }
 
 func EditTag(id int, data interface{}) bool {
-	db.Model(&Tag{}).Where("id=?", id).Updates(data)
-
-	return true
+	// var tag Tag
+	// tag.ID = id
+	// result := db.Model(&tag).Updates(&data)
+	result := db.Model(&Tag{}).Where("id=?", id).Updates(data)
+	log.Printf("result%d", result.RowsAffected)
+	if result.RowsAffected > 0 {
+		return true
+	}
+	return false
 }
 
 func (tag *Tag) BeforeCreate(tx *gorm.DB) (err error) {
@@ -78,9 +85,20 @@ func (tag *Tag) BeforeCreate(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (tag *Tag) BeforeSave(tx *gorm.DB) error {
-	tag.Model.ModifiedOn = int(time.Now().Unix())
-	tag.Model.CreatedOn = 123
-
+func (tag *Tag) BeforeUpdate(tx *gorm.DB) (err error) {
+	if tx.Statement.Changed() {
+		tx.Statement.SetColumn("ModifiedOn", time.Now().Unix())
+	}
 	return nil
+	// tag.Model.ModifiedOn = int(time.Now().Unix())
+	// tag.Model.CreatedOn = 123
+
+	// return nil
+}
+
+// 硬删除
+func CleanAllTag() bool {
+	db.Unscoped().Where("deleted != ", 0).Delete(&Tag{})
+
+	return true
 }

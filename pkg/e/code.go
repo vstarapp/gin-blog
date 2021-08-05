@@ -13,4 +13,5 @@ const (
 	ERROR_AUTH_CHECK_TOKEN_TIMETOU = 20002
 	ERROR_AUTH_TOKEN               = 20003
 	ERROR_AUTH                     = 20004
+	ERROR_EXIST_AUTH               = 20005
 )
